@@ -1,4 +1,5 @@
 import { Page, expect } from "@playwright/test";
+import { hyphenize } from "../utils/hyphenize";
 
 interface CreateTaskAndVerify {
     taskName: string
@@ -86,7 +87,7 @@ export class TaskPage {
 
     createCommentAndVerify = async ({ comment, taskName }: Comments) => {
         const addCommentApi = this.page.waitForResponse(response =>
-            response.url().includes(taskName.split(" ").join("-"))
+            response.url().includes(hyphenize(taskName))
         );
         await this.page.getByTestId("comments-text-field").fill(comment);
         await this.page.getByTestId("comments-submit-button").click();

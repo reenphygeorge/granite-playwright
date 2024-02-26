@@ -1,11 +1,12 @@
 import { test } from "../fixtures";
 import { faker } from "@faker-js/faker";
 import { expect } from "playwright/test";
-import { creator } from "../../constants";
+import { assignee, creator } from "../../constants";
+import LoginPage from "../pom/login";
 
 const { username } = creator
 test.describe("Tasks page", () => {
-    
+
     let taskName: string;
 
     test.beforeEach(() => {
@@ -52,13 +53,13 @@ test.describe("Tasks page", () => {
 });
 
 test.describe("Starring tasks feature", () => {
-    
+
     let taskName: string;
-    
+
     test.beforeEach(() => {
         taskName = faker.word.words({ count: 5 });
     });
-    
+
     test.describe.configure({ mode: "serial" });
 
     test("should be able to star a pending task", async ({
@@ -93,5 +94,37 @@ test.describe("Starring tasks feature", () => {
             await starIcon.click();
             await expect(starIcon).toHaveClass(/ri-star-line/);
         })
+    });
+
+    test("should create a new task with a different user as the assignee", async ({
+        page,
+        browser,
+        taskPage,
+    }) => {
+        await page.goto("/");
+        await taskPage.createTaskAndVerify({ taskName, username: "Sam Smith" });
+        const assigneeContext = await browser.newContext({
+            storageState: { cookies: [], origins: [] },
+        });
+
+        const assigneePage = await assigneeContext.newPage();
+        let assigneeAuth
+
+        await test.step("step 1 - Create new browser window for assignee", async () => {
+            assigneeAuth = new LoginPage(assigneePage);
+        })
+
+        await test.step("step 2  - Login as assignee and verify the assigned task", async () => {
+            await assigneePage.goto("/");
+            await assigneeAuth.loginAndVerifyUser(assignee);
+            await expect(
+                assigneePage
+                    .getByTestId("tasks-pending-table")
+                    .getByRole("row", { name: taskName })
+            ).toBeVisible();
+        })
+
+        await assigneePage.close();
+        await assigneeContext.close();
     });
 });

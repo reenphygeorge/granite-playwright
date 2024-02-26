@@ -52,11 +52,11 @@ test.describe("Comment Page", () => {
                 count: 1,
             }));
 
-        const creatorContext = await browser.newContext({
+        const assigneeContext = await browser.newContext({
             storageState: { cookies: [], origins: [] },
         });
 
-        const assigneePage = await creatorContext.newPage();
+        const assigneePage = await assigneeContext.newPage();
 
         let assigneeTasks: TaskPage;
         let assigneeAuth: LoginPage;
@@ -97,6 +97,6 @@ test.describe("Comment Page", () => {
             }));
 
         await assigneePage.close();
-        await creatorContext.close();
+        await assigneeContext.close();
     });
 });
