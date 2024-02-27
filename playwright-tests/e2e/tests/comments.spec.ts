@@ -5,6 +5,7 @@ import { assignee } from "../../constants";
 import { TaskPage } from "../pom/tasks";
 import { faker } from "@faker-js/faker";
 import LoginPage from "../pom/login";
+import { hyphenize } from "../utils/hyphenize";
 
 test.describe("Comment Page", () => {
     let todoName: string;
@@ -31,9 +32,9 @@ test.describe("Comment Page", () => {
             }));
 
         await test.step("step 2 - Go to the previously created task", async () => {
-            const endPoint = todoName.replace(/\s+/g, "-");
+            // const endPoint = todoName.replace(/\s+/g, "-");
             const waitForTask = page.waitForResponse(response =>
-                response.url().includes(endPoint)
+                response.url().includes(hyphenize(todoName))
             );
             await page.getByTestId("tasks-pending-table").getByText(todoName).click();
             await waitForTask;
@@ -69,10 +70,10 @@ test.describe("Comment Page", () => {
         await test.step("step 6  - Login as assignee and go to the assigned task", async () => {
             await assigneePage.goto("/");
 
-            const endPoint = todoName.replace(/\s+/g, "-");
+            // const endPoint = todoName.replace(/\s+/g, "-");
 
             const taskDetailsApi = assigneePage.waitForResponse(response =>
-                response.url().includes(endPoint)
+                response.url().includes(hyphenize(todoName))
             );
             await assigneeAuth.loginAndVerifyUser(assignee);
             await assigneePage
